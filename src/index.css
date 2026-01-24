@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* 1. 引入手绘字体 (从 Google Fonts 引入类似的 ZCOOL KuaiLe) */
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+@theme {
+  /* 定义字体变量供 Tailwind 使用 */
+  --font-zcool: "ZCOOL KuaiLe", cursive;
+}
+
+/* 2. 定义 PDF 中的三套情感主题色 [cite: 26, 27] */
+:root {
+  /* --- 默认: Chiikawa Soft (纯真/梦幻) --- */
+  --bg-paper: #FFFFF7;       /* 奶油白 */
+  --text-ink: #4B5B76;       /* 深灰蓝 (用于文字) */
+  --color-primary: #EFA5C9;  /* 腮红粉 (用于主按钮/高亮) */
+  --color-accent: #08B4F8;   /* 吉伊蓝 (用于装饰) */
+  
+  /* --- 状态: Loopy Chaos (搞怪/发疯) --- */
+  --bg-loopy: #FFEEEF;       /* 淡粉红 */
+  --ink-loopy: #5C230A;      /* 深褐色 */
+  --color-loopy: #FF8B8B;    /* 露比粉 */
+
+  /* --- 状态: Capy Chill (宁静/治愈) --- */
+  --bg-capy: #F2E2D9;        /* 拿铁色 */
+  --ink-capy: #4D2C19;       /* 咖啡色 */
+  --color-capy: #C67D53;     /* 水豚棕 */
+}
+
+/* 基础样式重置 */
+body {
+  background-color: var(--bg-paper);
+  color: var(--text-ink);
+  font-family: system-ui, -apple-system, sans-serif;
+  /* 平滑过渡背景色，用于章节切换 [cite: 37] */
+  transition: background-color 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); 
+}
+
+/* 标题默认使用快乐体 */
+h1, h2, h3, h4, .font-hand {
+  font-family: var(--font-zcool);
+}
