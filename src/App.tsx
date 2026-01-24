@@ -2,12 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Music, Lock, ChevronDown, MapPin, Calendar, Star, Coffee, Snowflake, Loader2, Sparkles, X, ChevronLeft, Camera } from 'lucide-react';
 import { useAudio } from 'react-use';
+// 确保 components 文件夹下有 RoughCard.tsx
 import { RoughCard } from './components/RoughCard';
 
 // ==========================================
 // 1. 数据配置区
 // ==========================================
-const ASSETS_PATH = 'https://ccrr0506.github.io/LoveReport/assets';
+// 🟢 修复点：自动判断路径。本地开发用 /assets，发布上线用 /LoveReport/assets
+const ASSETS_PATH = import.meta.env.MODE === 'production' ? '/LoveReport/assets' : '/assets';
+
 const CONFIG = {
   audio: {
     bgm: `${ASSETS_PATH}/audio/bgm.mp3`,
@@ -21,7 +24,7 @@ const CONFIG = {
     loopy: `${ASSETS_PATH}/images/loopy_deco.png`,
     bg: `${ASSETS_PATH}/images/bg_chiikawa.jpg`,      
     weed: `${ASSETS_PATH}/images/weed.png`,           
-    flower: `${ASSETS_PATH}/images/flower.png`, // 你的乌萨其图片
+    flower: `${ASSETS_PATH}/images/flower.png`, 
     chiikawaHappy: `${ASSETS_PATH}/images/chiikawa_happy.png`, 
   },
   cover: {
@@ -33,7 +36,6 @@ const CONFIG = {
       `${ASSETS_PATH}/images/cover3.jpg`,
     ],
   },
-  // 🟢 配置每一株杂草背后的“回忆故事”
   weeds: [
     { 
       id: 1, 
@@ -42,8 +44,8 @@ const CONFIG = {
       memory: {
         title: "跨越1800公里的拥抱",
         date: "2025.09.20",
-        desc: "异地恋真的很辛苦，隔着屏幕感受不到你的温度。但是，当我走出车站看到你的那一刻，所有的辛苦都变成了值得。这是我们第一次奔赴，也是我最心动的瞬间。",
-        photo: `${ASSETS_PATH}/images/timeline_harbin1.jpg` // 换成你们见面的照片
+        desc: "异地恋真的很辛苦，隔着屏幕感受不到你的温度。但是，当我走出车站看到你的那一刻，所有的辛苦都变成了值得。",
+        photo: `${ASSETS_PATH}/images/timeline_harbin1.jpg`
       }
     },
     { 
@@ -53,7 +55,7 @@ const CONFIG = {
       memory: {
         title: "你的声音是最好的安慰",
         date: "2025.06.15",
-        desc: "那天加班到很晚，心情特别差。是你一直陪我连麦，听我吐槽，还给我点了外卖。谢谢你做我情绪的垃圾桶，有你在真好。",
+        desc: "那天加班到很晚，心情特别差。是你一直陪我连麦，听我吐槽，还给我点了外卖。谢谢你做我情绪的垃圾桶。",
         photo: `${ASSETS_PATH}/images/cover1.jpg`
       }
     },
@@ -64,7 +66,7 @@ const CONFIG = {
       memory: {
         title: "雨过天晴的甜蜜",
         date: "2025.07.20",
-        desc: "傻瓜，其实那时候我也很难受。冷战不是因为不爱，而是太在乎。还好我们都没有放弃，和好后的那个亲亲，比糖还甜。",
+        desc: "傻瓜，其实那时候我也很难受。冷战不是因为不爱，而是太在乎。还好我们都没有放弃。",
         photo: `${ASSETS_PATH}/images/cover2.jpg`
       }
     },
@@ -75,7 +77,7 @@ const CONFIG = {
       memory: {
         title: "遗憾也是风景",
         date: "2025.10.01",
-        desc: "虽然没去成想去的地方，但只要和你在一起，哪里都是风景。下次我们一定提前抢票，去更多地方！",
+        desc: "虽然没去成想去的地方，但只要和你在一起，哪里都是风景。下次我们一定提前抢票！",
         photo: `${ASSETS_PATH}/images/cover3.jpg`
       }
     },
@@ -86,7 +88,7 @@ const CONFIG = {
       memory: {
         title: "攒够思念就见面",
         date: "Everyday",
-        desc: "想你的时候，我就看看我们的聊天记录。每一句“晚安”，都是我爱你的证据。快点见面吧，我想抱抱你！",
+        desc: "想你的时候，我就看看我们的聊天记录。每一句“晚安”，都是我爱你的证据。",
         photo: `${ASSETS_PATH}/images/timeline_harbin2.jpg`
       }
     },
@@ -107,6 +109,15 @@ const CONFIG = {
 // ==========================================
 // 2. 基础组件库
 // ==========================================
+
+// 🟢 修复点：这就是之前报错缺失的变量，现在加上了！
+const pageVariants = {
+  initial: { opacity: 0, y: '100%' },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: '-100%', scale: 0.9 },
+};
+const pageTransition = { type: 'tween', ease: 'anticipate', duration: 0.8 };
+
 const CuteDeco = ({ src, className, rotate = 12 }: { src: string, className?: string, rotate?: number }) => (
   <motion.img
     src={src}
@@ -119,7 +130,6 @@ const CuteDeco = ({ src, className, rotate = 12 }: { src: string, className?: st
   />
 );
 
-// 🟢 新增：回忆详情页 (全屏覆盖)
 const MemoryDetail = ({ data, onClose }: { data: any, onClose: () => void }) => {
   if (!data) return null;
   return (
@@ -130,7 +140,6 @@ const MemoryDetail = ({ data, onClose }: { data: any, onClose: () => void }) => 
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="fixed inset-0 z-[200] bg-[#FFF5F7] flex flex-col overflow-y-auto"
     >
-      {/* 顶部导航栏 */}
       <div className="sticky top-0 bg-white/80 backdrop-blur-md p-4 flex items-center shadow-sm z-10">
         <button onClick={onClose} className="p-2 bg-pink-100 rounded-full text-pink-600 hover:bg-pink-200 transition-colors">
           <ChevronLeft size={24} />
@@ -138,7 +147,6 @@ const MemoryDetail = ({ data, onClose }: { data: any, onClose: () => void }) => 
         <span className="ml-4 font-bold text-pink-800 text-lg font-hand">爱的回忆录</span>
       </div>
 
-      {/* 内容区 */}
       <div className="p-6 flex-1 flex flex-col items-center">
         <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-xl mb-6 border-4 border-white relative">
            <img src={data.memory.photo} className="w-full h-full object-cover" />
@@ -241,11 +249,7 @@ const CoverPage = () => (
   </div>
 );
 
-// ==========================================
-// (3) StatsPage - 【状态保持版】
-// ==========================================
 const StatsPage = () => {
-  // 🟢 这里的 state 负责保存游戏状态。即使弹窗打开，这里的数据也不会变。
   const [items, setItems] = useState(() => CONFIG.weeds.map(w => ({ ...w, status: 'weed' })));
   const [activeMemory, setActiveMemory] = useState<any>(null); 
   const allCleared = items.every(i => i.status === 'flower');
@@ -261,7 +265,7 @@ const StatsPage = () => {
   return (
     <div className="h-full w-full relative overflow-hidden font-hand select-none text-[#5D4037]">
       
-      {/* 🟢 背景层 (始终显示) */}
+      {/* 🟢 背景层 */}
       <div className="absolute inset-0 z-0">
         <img src={CONFIG.deco.bg} className="w-full h-full object-cover" alt="bg"/>
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/70 to-transparent" />
@@ -294,10 +298,9 @@ const StatsPage = () => {
                   initial={{ rotate: item.rotate }}
                   exit={{ scale: 0, opacity: 0 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => handleWeedClick(item.id)} // 🟢 点击拔草
+                  onClick={() => handleWeedClick(item.id)}
                   className="relative group flex flex-col items-center cursor-pointer"
                 >
-                  {/* 杂草贴图：自动去白底 */}
                   <div className="relative">
                     <img 
                       src={CONFIG.deco.weed} 
@@ -315,17 +318,13 @@ const StatsPage = () => {
                   initial={{ scale: 0, y: 15 }}
                   animate={{ scale: 1, y: 0 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setActiveMemory(item)} // 🟢 点击看回忆
+                  onClick={() => setActiveMemory(item)} 
                   className="relative flex flex-col items-center cursor-pointer"
                 >
-                   {/* 坑洞光晕 */}
                    <div className="absolute bottom-4 w-20 h-20 bg-yellow-200/50 rounded-full blur-xl animate-pulse" />
-                   
-                   {/* 乌萨其 */}
                    <img src={CONFIG.deco.flower} className="w-20 h-20 object-contain drop-shadow-xl z-10" />
                    <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-400 fill-yellow-400 animate-pulse z-20"/>
                    
-                   {/* 提示气泡 */}
                    <motion.div 
                      initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} delay={0.2}
                      className="absolute -top-8 right-[-10px] bg-white text-pink-500 text-[10px] px-2 py-1 rounded-lg shadow-sm border border-pink-100 whitespace-nowrap"
@@ -339,7 +338,6 @@ const StatsPage = () => {
         ))}
       </div>
 
-      {/* 庆祝动画 (只有当没有打开回忆弹窗时才显示) */}
       <AnimatePresence>
         {allCleared && !activeMemory && (
           <motion.div 
@@ -356,7 +354,6 @@ const StatsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* 🟢 回忆详情页弹窗 (覆盖在最上层) */}
       <AnimatePresence>
         {activeMemory && <MemoryDetail data={activeMemory} onClose={() => setActiveMemory(null)} />}
       </AnimatePresence>
